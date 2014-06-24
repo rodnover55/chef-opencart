@@ -1,13 +1,6 @@
 db_name = node['deploy-project']['db']['database'] || node['deploy-project']['project']
 
 
-["#{node['deploy-project']['path']}/admin/config.php",
- "#{node['deploy-project']['path']}/config.php"].each do |fn|
-  file fn do
-    action :create_if_missing
-  end
-end
-
 unless node['opencart']['email'].nil? || node['opencart']['password'].nil?
   execute "php install/cli_install.php install --db_driver '#{node['deploy-project']['db']['provider']}' --db_host '#{node['deploy-project']['db']['host']}' --db_user '#{node['deploy-project']['db']['user']}' --db_password '#{node['deploy-project']['db']['password']}' --db_name '#{db_name}' --username 'admin' --password '#{node['opencart']['password']}' --email '#{node['opencart']['email']}' --agree_tnc yes --http_server 'http://#{node['deploy-project']['domain']}/'" do
     cwd node['deploy-project']['db']['migrate_cwd']
