@@ -3,7 +3,7 @@ db_name = node['deploy-project']['db']['database'] || node['deploy-project']['pr
 
 unless node['opencart']['email'].nil? || node['opencart']['password'].nil?
   execute "php install/cli_install.php install --db_driver '#{node['deploy-project']['db']['provider']}' --db_host '#{node['deploy-project']['db']['host']}' --db_user '#{node['deploy-project']['db']['user']}' --db_password '#{node['deploy-project']['db']['password']}' --db_name '#{db_name}' --username 'admin' --password '#{node['opencart']['password']}' --email '#{node['opencart']['email']}' --agree_tnc yes --http_server 'http://#{node['deploy-project']['domain']}/'" do
-    cwd node['deploy-project']['db']['migrate_cwd']
+    cwd node['deploy-project']['path']
     not_if { ::File.exists?("#{node['deploy-project']['path']}/config.php") ||
         ::File.exists?("#{node['deploy-project']['path']}/admin/config.php") ||
         ::File.exists?("#{node['deploy-project']['path']}/cli/config.php") }
