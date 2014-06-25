@@ -35,6 +35,10 @@ template "#{node['deploy-project']['path']}/.htaccess" do
   group node['apache']['group']
 end
 
+if node['opencart']['steroids']
+  include_recipe 'opencart::steroids'
+end
+
 # unless node['opencart']['informations'].nil?
 #   node['opencart']['informations'].each do |information|
 #     php_oc_information information['template'] do
