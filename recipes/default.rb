@@ -66,16 +66,16 @@ end
 #   end
 # end
 #
-# %w(modules payments feeds totals).each do |extention|
-#   unless node['opencart'][extention].nil?
-#     node['opencart'][extention].each do |name, action|
-#       php_oc_extention name do
-#         action action
-#         type extention
-#       end
-#     end
-#   end
-# end
+%w(modules payments feeds totals).each do |extention|
+  unless node['opencart'][extention].nil?
+    node['opencart'][extention].each do |name, action|
+      php_oc_extention name do
+        action action
+        type extention
+      end
+    end
+  end
+end
 #
 # unless node['opencart']['permissions'].nil?
 #   node['opencart']['permissions'].each do |type, permissions|
