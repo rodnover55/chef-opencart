@@ -54,18 +54,18 @@ end
 #     end
 #   end
 # end
-#
-# unless node['opencart']['settings'].nil?
-#   node['opencart']['settings'].each do |group, settings|
-#     settings.each do |key, value|
-#       php_oc_setting key do
-#         group group
-#         value value
-#       end
-#     end
-#   end
-# end
-#
+
+unless node['opencart']['settings'].nil?
+  node['opencart']['settings'].each do |group, settings|
+    settings.each do |key, value|
+      php_oc_setting key do
+        group group
+        value value
+      end
+    end
+  end
+end
+
 %w(modules payments feeds totals).each do |extention|
   unless node['opencart'][extention].nil?
     node['opencart'][extention].each do |name, action|
@@ -76,31 +76,31 @@ end
     end
   end
 end
-#
-# unless node['opencart']['permissions'].nil?
-#   node['opencart']['permissions'].each do |type, permissions|
-#     permissions.each do |page, permission|
-#       if permission.is_a?(Array)
-#         permission.each do |name|
-#           php_oc_permission name do
-#             type type
-#             page page
-#           end
-#         end
-#       else
-#         permission.each do |action, groups|
-#           groups.each do |name|
-#             php_oc_permission name do
-#               type type
-#               page page
-#               action action
-#             end
-#           end
-#         end
-#       end
-#     end
-#   end
-# end
+
+unless node['opencart']['permissions'].nil?
+  node['opencart']['permissions'].each do |type, permissions|
+    permissions.each do |page, permission|
+      if permission.is_a?(Array)
+        permission.each do |name|
+          php_oc_permission name do
+            type type
+            page page
+          end
+        end
+      else
+        permission.each do |action, groups|
+          groups.each do |name|
+            php_oc_permission name do
+              type type
+              page page
+              action action
+            end
+          end
+        end
+      end
+    end
+  end
+end
 #
 # unless node['opencart']['geo_zones'].nil?
 #   node['opencart']['geo_zones'].each do |geo_zone|
