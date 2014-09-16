@@ -8,12 +8,14 @@ define :php_oc_extention, :module => nil, :action => nil, :config => nil, :type 
     action = params[:action]
   end
 
-  unless %w{install uninstall}.include?(action)
+  unless %w{install uninstall configure}.include?(action)
     raise "Set required params for module '#{params[:module]}'"
   end
 
-  execute "php cli/index.php extensions/#{params[:type]} '#{action}' '#{params[:module]}'" do
-    cwd node['deploy-project']['path']
+  unless %w{configure}.include?(action)
+    execute "php cli/index.php extensions/#{params[:type]} '#{action}' '#{params[:module]}'" do
+      cwd node['deploy-project']['path']
+    end
   end
 
   unless data.nil?
