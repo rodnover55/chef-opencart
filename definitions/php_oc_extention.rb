@@ -1,7 +1,5 @@
 define :php_oc_extention, :module => nil, :action => nil, :config => nil, :type => 'module' do
-  unless %w{install uninstall}.include?(params[:action])
-    raise 'Set required params'
-  end
+  params[:module] ||= params[:name]
 
   if params[:action].is_a?(Hash)
     data = params[:action]
@@ -10,7 +8,10 @@ define :php_oc_extention, :module => nil, :action => nil, :config => nil, :type 
     action = params[:action]
   end
 
-  params[:module] ||= params[:name]
+  unless %w{install uninstall}.include?(action)
+    raise "Set required params for module '#{params[:module]}'"
+  end
+
   execute "php cli/index.php extensions/#{params[:type]} '#{action}' '#{params[:module]}'" do
     cwd node['deploy-project']['path']
   end
