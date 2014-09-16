@@ -66,6 +66,14 @@ unless node['opencart']['settings'].nil?
   end
 end
 
+unless node['opencart']['store'].nil?
+  node['opencart']['store'].each do |key, value|
+    execute "php cli/index.php store/configure '#{key}' '#{value}'" do
+      cwd node['deploy-project']['path']
+    end
+  end
+end
+
 %w(modules payments feeds totals).each do |extention|
   unless node['opencart'][extention].nil?
     node['opencart'][extention].each do |name, action|
@@ -150,20 +158,6 @@ end
 #   execute "php cli/index.php configure/enable_languages #{languages}" do
 #     cwd node['deploy-project']['path']
 #     action :run
-#   end
-# end
-#
-#
-# template "#{node['deploy-project']['path']}/deploy/migrations-db.php" do
-#   source 'doc-migrations-db.php.erb'
-#   owner node['apache']['user']
-#   group node['apache']['group']
-# end
-#
-# unless node['deploy-project']['db']['migrate'].nil?
-#   execute "migrate" do
-#     command "sleep 5; #{node['deploy-project']['db']['migrate']}"
-#     cwd node['deploy-project']['db']['migrate_cwd']
 #   end
 # end
 #
