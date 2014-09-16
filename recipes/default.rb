@@ -74,7 +74,7 @@ unless node['opencart']['store'].nil?
   end
 end
 
-%w(modules payments feeds totals).each do |extention|
+%w(modules payments feeds totals shippings).each do |extention|
   unless node['opencart'][extention].nil?
     node['opencart'][extention].each do |name, action|
       php_oc_extention name do
