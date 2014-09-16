@@ -18,7 +18,7 @@ define :php_oc_extention, :module => nil, :action => nil, :config => nil, :type 
     end
   end
 
-  unless data.nil?
+  unless data.nil? || %w{uninstall}.include?(action)
     require 'json'
 
     json_data = data.to_json
