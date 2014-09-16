@@ -4,8 +4,8 @@ define :php_oc_permission, :action => 'add', :group => nil, :type => 'access', :
   end
   params[:group] ||= params[:name]
 
-  execute "php cli/index.php configure/permissions '#{params[:action]}' '#{params[:group]}' '#{params[:type]}' '#{params[:page]}'" do
-    command "php cli/index.php configure/permissions '#{params[:action]}' '#{params[:group]}' '#{params[:type]}' '#{params[:page]}'"
+  execute "php cli/index.php users/permissions '#{params[:action]}' '#{params[:group]}' '#{params[:type]}' '#{params[:page]}'" do
+    command "php cli/index.php users/permissions '#{params[:action]}' '#{params[:group]}' '#{params[:type]}' '#{params[:page]}'"
     cwd node['deploy-project']['path']
     action :run
   end
