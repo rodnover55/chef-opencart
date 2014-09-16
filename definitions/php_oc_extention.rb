@@ -19,7 +19,7 @@ define :php_oc_extention, :module => nil, :action => nil, :config => nil, :type 
   unless data.nil?
     require 'json'
 
-    json_data = configure_data.to_json
+    json_data = data.to_json
     execute "echo '#{json_data}' | php cli/index.php extensions/#{params[:type]} 'configure' '#{params[:module]}'" do
       cwd node['deploy-project']['path']
     end
