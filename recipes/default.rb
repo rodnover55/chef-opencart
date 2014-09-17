@@ -212,6 +212,7 @@ unless node['opencart']['categories'].nil?
     php_oc_category keyword do
       image category['image']
       description category['description']
+      status category['status'] || 0
     end
   end
 end

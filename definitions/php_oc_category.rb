@@ -1,4 +1,5 @@
-define :php_oc_category, :image => nil, :keyword => nil, :description => nil do
+define :php_oc_category, :image => nil, :keyword => nil, :description => nil,
+  :status => 0 do
   params[:keyword] ||= params[:name]
 
   require 'json'
@@ -6,7 +7,8 @@ define :php_oc_category, :image => nil, :keyword => nil, :description => nil do
   category_data = {
       keyword: params[:keyword],
       image: params[:image],
-      description: params[:description]
+      description: params[:description],
+      status: params[:status]
   }.to_json
 
   execute "echo '#{category_data}' | php cli/index.php category" do
