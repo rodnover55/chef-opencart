@@ -80,6 +80,16 @@ unless node['opencart']['store'].nil?
   end
 end
 
+unless node['opencart']['categories'].nil?
+  node['opencart']['categories'].each do |keyword, category|
+    php_oc_category keyword do
+      image category['image']
+      description category['description']
+      status category['status'] || 0
+    end
+  end
+end
+
 %w(modules payments feeds totals shippings).each do |extention|
   unless node['opencart'][extention].nil?
     node['opencart'][extention].each do |name, action|
@@ -207,15 +217,7 @@ end
 #   end
 # end
 #
-unless node['opencart']['categories'].nil?
-  node['opencart']['categories'].each do |keyword, category|
-    php_oc_category keyword do
-      image category['image']
-      description category['description']
-      status category['status'] || 0
-    end
-  end
-end
+
 #
 # unless node['opencart']['currencies'].nil?
 #   node['opencart']['currencies'].each do |currency|
