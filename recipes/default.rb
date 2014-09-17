@@ -207,14 +207,14 @@ end
 #   end
 # end
 #
-# unless node['opencart']['categories'].nil?
-#   node['opencart']['categories'].each do |category|
-#     php_oc_category category['keyword'] do
-#       image category['image']
-#       description category['description']
-#     end
-#   end
-# end
+unless node['opencart']['categories'].nil?
+  node['opencart']['categories'].each do |keyword, category|
+    php_oc_category keyword do
+      image category['image']
+      description category['description']
+    end
+  end
+end
 #
 # unless node['opencart']['currencies'].nil?
 #   node['opencart']['currencies'].each do |currency|
