@@ -231,13 +231,13 @@ end
 #   end
 # end
 #
-# if node['deploy-project']['dev']
-#   execute "php cli/index.php configure/password 'admin' '123123'" do
-#     command "php cli/index.php configure/password 'admin' '123123'"
-#     cwd node['deploy-project']['path']
-#     action :run
-#   end
-# end
+unless node['opencart']['layouts'].nil?
+  node['opencart']['layouts'].each do |name, routes|
+    php_oc_layout name do
+      routes routes
+    end
+  end
+end
 
 execute "rm -rf #{node['deploy-project']['path']}/system/cache/*" do
   action :run
