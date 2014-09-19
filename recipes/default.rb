@@ -90,6 +90,14 @@ unless node['opencart']['categories'].nil?
   end
 end
 
+unless node['opencart']['layouts'].nil?
+  node['opencart']['layouts'].each do |name, routes|
+    php_oc_layout name do
+      routes routes
+    end
+  end
+end
+
 %w(modules payments feeds totals shippings).each do |extention|
   unless node['opencart'][extention].nil?
     node['opencart'][extention].each do |name, action|
@@ -125,16 +133,17 @@ unless node['opencart']['permissions'].nil?
     end
   end
 end
-#
-# unless node['opencart']['geo_zones'].nil?
-#   node['opencart']['geo_zones'].each do |geo_zone|
-#     php_oc_geo_zone geo_zone['slug'] do
-#       geo_zone_name geo_zone['name']
-#       description geo_zone['description']
-#       zones geo_zone['zones']
-#     end
-#   end
-# end
+
+unless node['opencart']['geo_zones'].nil?
+  node['opencart']['geo_zones'].each do |slug, geo_zone|
+    php_oc_geo_zone slug do
+      geo_zone_name geo_zone['name']
+      description geo_zone['description']
+      zones geo_zone['zones']
+    end
+  end
+end
+
 #
 # unless node['opencart']['tax_rates'].nil?
 #   node['opencart']['tax_rates'].each do |tax_rate|
@@ -240,14 +249,6 @@ end
 #   end
 # end
 #
-unless node['opencart']['layouts'].nil?
-  node['opencart']['layouts'].each do |name, routes|
-    php_oc_layout name do
-      routes routes
-    end
-  end
-end
-
 execute "rm -rf #{node['deploy-project']['path']}/system/cache/*" do
   action :run
 end
