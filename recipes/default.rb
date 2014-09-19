@@ -27,13 +27,23 @@ template "#{node['deploy-project']['path']}/.htaccess" do
 end
 
 unless node['opencart']['email'].nil? || node['opencart']['password'].nil?
-  execute "php install/cli_install.php install --db_driver '#{node['deploy-project']['db']['provider']}' --db_host '#{node['deploy-project']['db']['host']}' --db_user '#{node['deploy-project']['db']['user']}' --db_password '#{node['deploy-project']['db']['password']}' --db_name '#{db_name}' --username 'admin' --password '#{node['opencart']['password']}' --email '#{node['opencart']['email']}' --agree_tnc yes --http_server 'http://#{node['deploy-project']['domain']}/'" do
+  if node['deploy-project']['db']['install'].nil? ||
+      ::File.exists?(node['deploy-project']['db']['install'])
+    flag = ' --only_config=yes'
+  else
+    flag = ''
+
+  end
+  execute "php install/cli_install.php install#{flag} --db_driver '#{node['deploy-project']['db']['provider']}' --db_host '#{node['deploy-project']['db']['host']}' --db_user '#{node['deploy-project']['db']['user']}' --db_password '#{node['deploy-project']['db']['password']}' --db_name '#{db_name}' --username 'admin' --password '#{node['opencart']['password']}' --email '#{node['opencart']['email']}' --agree_tnc yes --http_server 'http://#{node['deploy-project']['domain']}/'" do
     cwd node['deploy-project']['path']
     not_if { ::File.exists?("#{node['deploy-project']['path']}/config.php") ||
         ::File.exists?("#{node['deploy-project']['path']}/admin/config.php") ||
         ::File.exists?("#{node['deploy-project']['path']}/cli/config.php") }
   end
+else
+  raise 'Email and password not configured.'
 end
+
 
 if node['opencart']['steroids']
   include_recipe 'opencart::steroids'
