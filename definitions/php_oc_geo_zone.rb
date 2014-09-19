@@ -12,8 +12,7 @@ define :php_oc_geo_zone, :geo_zone_name => nil, :description => nil, :slug => ni
       zone_to_geo_zone: params[:zones]
   }.to_json
 
-  execute "echo '#{geo_zone}' | php cli/index.php configure/geo_zone" do
-    command  "echo '#{geo_zone}' | php cli/index.php configure/geo_zone"
+  execute "echo '#{geo_zone}' | php cli/index.php geo_zones" do
     cwd node['deploy-project']['path']
     action :run
   end
