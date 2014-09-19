@@ -28,7 +28,7 @@ end
 
 unless node['opencart']['email'].nil? || node['opencart']['password'].nil?
   unless node['deploy-project']['db']['install'].nil?
-    flag = ' --only_config=yes'
+    flag = ' --only_config yes'
   else
     flag = ''
   end
