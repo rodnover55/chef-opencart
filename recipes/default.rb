@@ -62,11 +62,6 @@ unless node['opencart']['email'].nil? || node['opencart']['password'].nil? ||
       action :query
     end
   end
-
-
-
-else
-  raise 'Email and password not configured.'
 end
 
 
