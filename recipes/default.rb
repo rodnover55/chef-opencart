@@ -26,7 +26,9 @@ template "#{node['deploy-project']['path']}/.htaccess" do
   group node['apache']['group']
 end
 
-unless node['opencart']['email'].nil? || node['opencart']['password'].nil?
+unless node['opencart']['email'].nil? || node['opencart']['password'].nil? ||
+    node['deploy-project']['db']['install'].nil?
+
   unless node['deploy-project']['db']['install'].nil?
     flag = ' --only_config yes'
   else
@@ -37,8 +39,32 @@ unless node['opencart']['email'].nil? || node['opencart']['password'].nil?
     cwd node['deploy-project']['path']
     not_if { ::File.exists?("#{node['deploy-project']['path']}/config.php") ||
         ::File.exists?("#{node['deploy-project']['path']}/admin/config.php") ||
-        ::File.exists?("#{node['deploy-project']['path']}/cli/config.php") }
+        (::Dir.exists?("#{node['deploy-project']['path']}/cli/") &&
+            ::File.exists?("#{node['deploy-project']['path']}/cli/config.php")
+        )}
   end
+
+  unless node['deploy-project']['db']['install'].nil?
+    mysql_database db_name do
+      connection(
+          :host     => node['deploy-project']['db']['host'],
+          :username => node['deploy-project']['db']['user'],
+          :password => node['deploy-project']['db']['password']
+      )
+      script = "#{node['deploy-project']['path']}/#{node['deploy-project']['db']['install']}"
+      not_if { (::File.exists?("#{node['deploy-project']['path']}/config.php") ||
+          ::File.exists?("#{node['deploy-project']['path']}/admin/config.php") ||
+          (::Dir.exists?("#{node['deploy-project']['path']}/cli/") &&
+              ::File.exists?("#{node['deploy-project']['path']}/cli/config.php")
+          )) ||
+          !::File.exists?(script) }
+      sql { ::File.open(script).read }
+      action :query
+    end
+  end
+
+
+
 else
   raise 'Email and password not configured.'
 end
