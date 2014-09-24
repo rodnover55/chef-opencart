@@ -282,3 +282,10 @@ end
 execute "rm -rf #{node['deploy-project']['path']}/system/cache/*" do
   action :run
 end
+
+if node['deploy-project']['dev']
+  execute "php cli/index.php configure/password 'admin' '123123'" do
+    cwd node['deploy-project']['path']
+    action :run
+  end
+end
