@@ -284,8 +284,9 @@ execute "rm -rf #{node['deploy-project']['path']}/system/cache/*" do
 end
 
 if node['deploy-project']['dev']
-  execute "php cli/index.php configure/password 'admin' '123123'" do
+  execute "php cli/index.php users/password 'admin' '123123'" do
     cwd node['deploy-project']['path']
+    only_if { ::File::exists("#{node['deploy-project']['path']}/cli/index.php")}
     action :run
   end
 end
