@@ -26,22 +26,56 @@ template "#{node['deploy-project']['path']}/.htaccess" do
   group node['apache']['group']
 end
 
-unless node['opencart']['email'].nil? || node['opencart']['password'].nil? ||
-    node['deploy-project']['db']['install'].nil?
+unless node['opencart']['email'].nil? || node['opencart']['password'].nil?
 
-  unless node['deploy-project']['db']['install'].nil?
-    flag = ' --only_config yes'
+  flag = if node['deploy-project']['db']['install'].nil?
+    ''
   else
-    flag = ''
+    ' --only_config yes'
   end
 
-  execute "php install/cli_install.php install#{flag} --db_driver '#{node['deploy-project']['db']['provider']}' --db_host '#{node['deploy-project']['db']['host']}' --db_user '#{node['deploy-project']['db']['user']}' --db_password '#{node['deploy-project']['db']['password']}' --db_name '#{db_name}' --username 'admin' --password '#{node['opencart']['password']}' --email '#{node['opencart']['email']}' --agree_tnc yes --http_server 'http://#{node['deploy-project']['domain']}/'" do
+  if !node['opencart']['steroids']
+    file "Delete before #{node['deploy-project']['path']}/need_install" do
+      path "#{node['deploy-project']['path']}/need_install"
+      action :delete
+    end
+
+    file "#{node['deploy-project']['path']}/config.php" do
+      owner node['apache']['user']
+      group node['apache']['group']
+      action :create_if_missing
+      notifies :create, "file[#{node['deploy-project']['path']}/need_install]", :immediately
+    end
+    file "#{node['deploy-project']['path']}/admin/config.php" do
+      owner node['apache']['user']
+      group node['apache']['group']
+      action :create_if_missing
+      notifies :create, "file[#{node['deploy-project']['path']}/need_install]", :immediately
+    end
+    file "#{node['deploy-project']['path']}/need_install" do
+      owner 'root'
+      group 'root'
+      action :nothing
+    end
+  end
+
+  execute "Opencart cli-install" do
+    command "php install/cli_install.php install#{flag} --db_driver '#{node['deploy-project']['db']['provider']}' --db_host '#{node['deploy-project']['db']['host']}' --db_user '#{node['deploy-project']['db']['user']}' --db_password '#{node['deploy-project']['db']['password']}' --db_name '#{db_name}' --username 'admin' --password '#{node['opencart']['password']}' --email '#{node['opencart']['email']}' --agree_tnc yes --http_server 'http://#{node['deploy-project']['domain']}/'"
     cwd node['deploy-project']['path']
-    not_if { ::File.exists?("#{node['deploy-project']['path']}/config.php") ||
-        ::File.exists?("#{node['deploy-project']['path']}/admin/config.php") ||
-        (!node['opencart']['steroids'] && ::Dir.exists?("#{node['deploy-project']['path']}/cli/") &&
-            ::File.exists?("#{node['deploy-project']['path']}/cli/config.php")
-        )}
+    if node['opencart']['steroids']
+      not_if { ::File.exists?("#{node['deploy-project']['path']}/config.php") ||
+          ::File.exists?("#{node['deploy-project']['path']}/admin/config.php") ||
+          (::Dir.exists?("#{node['deploy-project']['path']}/cli/") &&
+              ::File.exists?("#{node['deploy-project']['path']}/cli/config.php")
+          )}
+    else
+      only_if { ::File.exists?("#{node['deploy-project']['path']}/need_install") }
+    end
+  end
+
+  file "Delete #{node['deploy-project']['path']}/need_install" do
+    path "#{node['deploy-project']['path']}/need_install"
+    action :delete
   end
 
   unless node['deploy-project']['db']['install'].nil?
