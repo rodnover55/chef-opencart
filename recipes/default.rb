@@ -39,7 +39,7 @@ unless node['opencart']['email'].nil? || node['opencart']['password'].nil? ||
     cwd node['deploy-project']['path']
     not_if { ::File.exists?("#{node['deploy-project']['path']}/config.php") ||
         ::File.exists?("#{node['deploy-project']['path']}/admin/config.php") ||
-        (::Dir.exists?("#{node['deploy-project']['path']}/cli/") &&
+        (!node['opencart']['steroids'] && ::Dir.exists?("#{node['deploy-project']['path']}/cli/") &&
             ::File.exists?("#{node['deploy-project']['path']}/cli/config.php")
         )}
   end
@@ -75,210 +75,213 @@ unless node['opencart']['db']['migrations'].nil?
   end
 end
 
-# unless node['opencart']['informations'].nil?
-#   node['opencart']['informations'].each do |information|
-#     php_oc_information information['template'] do
-#       keyword information['keyword']
-#       title information['title']
-#       sort_order information['sort_order'] || 0
-#       bottom information['bottom'] || 1
-#       status information['status'] || 1
-#       force information['force'] || false
-#       unless information['id'].nil?
-#         id information['id']
-#       end
-#     end
-#   end
-# end
+if node['opencart']['steroids']
+  # unless node['opencart']['informations'].nil?
+  #   node['opencart']['informations'].each do |information|
+  #     php_oc_information information['template'] do
+  #       keyword information['keyword']
+  #       title information['title']
+  #       sort_order information['sort_order'] || 0
+  #       bottom information['bottom'] || 1
+  #       status information['status'] || 1
+  #       force information['force'] || false
+  #       unless information['id'].nil?
+  #         id information['id']
+  #       end
+  #     end
+  #   end
+  # end
 
-unless node['opencart']['settings'].nil?
-  node['opencart']['settings'].each do |group, settings|
-    settings.each do |key, value|
-      php_oc_setting key do
-        group group
-        value value
-      end
-    end
-  end
-end
-
-unless node['opencart']['store'].nil?
-  node['opencart']['store'].each do |key, value|
-    execute "php cli/index.php store/configure '#{key}' '#{value}'" do
-      cwd node['deploy-project']['path']
-    end
-  end
-end
-
-unless node['opencart']['categories'].nil?
-  node['opencart']['categories'].each do |keyword, category|
-    php_oc_category keyword do
-      image category['image']
-      description category['description']
-      status category['status'] || 0
-    end
-  end
-end
-
-unless node['opencart']['layouts'].nil?
-  node['opencart']['layouts'].each do |name, routes|
-    php_oc_layout name do
-      routes routes
-    end
-  end
-end
-
-%w(modules payments feeds totals shippings).each do |extention|
-  unless node['opencart'][extention].nil?
-    node['opencart'][extention].each do |name, action|
-      php_oc_extention name do
-        action action
-        type extention
-      end
-    end
-  end
-end
-
-unless node['opencart']['permissions'].nil?
-  node['opencart']['permissions'].each do |type, permissions|
-    permissions.each do |page, permission|
-      if permission.is_a?(Array)
-        permission.each do |name|
-          php_oc_permission name do
-            type type
-            page page
-          end
+  unless node['opencart']['settings'].nil?
+    node['opencart']['settings'].each do |group, settings|
+      settings.each do |key, value|
+        php_oc_setting key do
+          group group
+          value value
         end
-      else
-        permission.each do |action, groups|
-          groups.each do |name|
+      end
+    end
+  end
+
+  unless node['opencart']['store'].nil?
+    node['opencart']['store'].each do |key, value|
+      execute "php cli/index.php store/configure '#{key}' '#{value}'" do
+        cwd node['deploy-project']['path']
+      end
+    end
+  end
+
+  unless node['opencart']['categories'].nil?
+    node['opencart']['categories'].each do |keyword, category|
+      php_oc_category keyword do
+        image category['image']
+        description category['description']
+        status category['status'] || 0
+      end
+    end
+  end
+
+  unless node['opencart']['layouts'].nil?
+    node['opencart']['layouts'].each do |name, routes|
+      php_oc_layout name do
+        routes routes
+      end
+    end
+  end
+
+  %w(modules payments feeds totals shippings).each do |extention|
+    unless node['opencart'][extention].nil?
+      node['opencart'][extention].each do |name, action|
+        php_oc_extention name do
+          action action
+          type extention
+        end
+      end
+    end
+  end
+
+  unless node['opencart']['permissions'].nil?
+    node['opencart']['permissions'].each do |type, permissions|
+      permissions.each do |page, permission|
+        if permission.is_a?(Array)
+          permission.each do |name|
             php_oc_permission name do
               type type
               page page
-              action action
+            end
+          end
+        else
+          permission.each do |action, groups|
+            groups.each do |name|
+              php_oc_permission name do
+                type type
+                page page
+                action action
+              end
             end
           end
         end
       end
     end
   end
-end
 
-unless node['opencart']['geo_zones'].nil?
-  node['opencart']['geo_zones'].each do |slug, geo_zone|
-    php_oc_geo_zone slug do
-      geo_zone_name geo_zone['name']
-      description geo_zone['description']
-      zones geo_zone['zones']
+  unless node['opencart']['geo_zones'].nil?
+    node['opencart']['geo_zones'].each do |slug, geo_zone|
+      php_oc_geo_zone slug do
+        geo_zone_name geo_zone['name']
+        description geo_zone['description']
+        zones geo_zone['zones']
+      end
     end
   end
+
+  #
+  # unless node['opencart']['tax_rates'].nil?
+  #   node['opencart']['tax_rates'].each do |tax_rate|
+  #     php_oc_tax_rate tax_rate['slug'] do
+  #       tax_rate_name tax_rate['name']
+  #       rate tax_rate['rate']
+  #       type tax_rate['type']
+  #       geo_zone tax_rate['geo_zone']
+  #     end
+  #   end
+  # end
+  #
+  # unless node['opencart']['tax_classes'].nil?
+  #   node['opencart']['tax_classes'].each do |tax_class|
+  #     php_oc_tax_class tax_class['slug'] do
+  #       title tax_class['title']
+  #       description tax_class['description']
+  #       tax_rule tax_class['tax_rule']
+  #     end
+  #   end
+  # end
+  #
+  # unless node['opencart']['languages'].nil?
+  #   node['opencart']['languages'].each do |language|
+  #     php_oc_language language['name'] do
+  #       code language['code']
+  #       locale language['locale']
+  #       image language['image']
+  #       directory language['directory']
+  #       filename language['filename']
+  #     end
+  #   end
+  # end
+  #
+  # unless node['opencart']['enabled_languages'].nil?
+  #   languages = node['opencart']['enabled_languages'].join(' ')
+  #   execute "php cli/index.php configure/enable_languages #{languages}" do
+  #     cwd node['deploy-project']['path']
+  #     action :run
+  #   end
+  # end
+  #
+  # unless node['opencart']['customers_groups'].nil?
+  #   node['opencart']['customers_groups'].each do |customer_group|
+  #     php_oc_customer_group customer_group['slug'] do
+  #       approval customer_group['approval']
+  #       sort_order customer_group['sort_order']
+  #       discount customer_group['discount']
+  #       discount_minimum customer_group['discount_minimum']
+  #       description customer_group['description']
+  #
+  #       unless customer_group['customer_group_id'].nil?
+  #         customer_group_id customer_group['customer_group_id']
+  #       end
+  #     end
+  #   end
+  # end
+  #
+  # unless node['opencart']['length_classes'].nil?
+  #   node['opencart']['length_classes'].each do |length|
+  #     php_oc_length length['slug'] do
+  #       value length['value']
+  #       description length['description']
+  #
+  #       unless length['length_class_id'].nil?
+  #         length_class_id length['length_class_id']
+  #       end
+  #     end
+  #   end
+  # end
+  #
+  #
+  # unless node['opencart']['banners'].nil?
+  #   node['opencart']['banners'].each do |banner|
+  #     php_oc_banner banner['name'] do
+  #       status banner['status'] || 1
+  #       force banner['force'] || false
+  #       images banner['banner_image']
+  #     end
+  #   end
+  # end
+  #
+
+  #
+  # unless node['opencart']['currencies'].nil?
+  #   node['opencart']['currencies'].each do |currency|
+  #     php_oc_currency currency['code'] do
+  #       title currency['title']
+  #       symbol_left currency['symbol_left']
+  #       symbol_right currency['symbol_right']
+  #       decimal_place currency['decimal_place']
+  #       value currency['value']
+  #       status currency['status']
+  #     end
+  #   end
+  # end
+  #
+  # unless node['opencart']['enabled_currencies'].nil?
+  #   currencies = node['opencart']['enabled_currencies'].join(' ')
+  #   execute "php cli/index.php currency/enable #{currencies}" do
+  #     cwd node['deploy-project']['path']
+  #     action :run
+  #   end
+  # end
+  #
 end
 
-#
-# unless node['opencart']['tax_rates'].nil?
-#   node['opencart']['tax_rates'].each do |tax_rate|
-#     php_oc_tax_rate tax_rate['slug'] do
-#       tax_rate_name tax_rate['name']
-#       rate tax_rate['rate']
-#       type tax_rate['type']
-#       geo_zone tax_rate['geo_zone']
-#     end
-#   end
-# end
-#
-# unless node['opencart']['tax_classes'].nil?
-#   node['opencart']['tax_classes'].each do |tax_class|
-#     php_oc_tax_class tax_class['slug'] do
-#       title tax_class['title']
-#       description tax_class['description']
-#       tax_rule tax_class['tax_rule']
-#     end
-#   end
-# end
-#
-# unless node['opencart']['languages'].nil?
-#   node['opencart']['languages'].each do |language|
-#     php_oc_language language['name'] do
-#       code language['code']
-#       locale language['locale']
-#       image language['image']
-#       directory language['directory']
-#       filename language['filename']
-#     end
-#   end
-# end
-#
-# unless node['opencart']['enabled_languages'].nil?
-#   languages = node['opencart']['enabled_languages'].join(' ')
-#   execute "php cli/index.php configure/enable_languages #{languages}" do
-#     cwd node['deploy-project']['path']
-#     action :run
-#   end
-# end
-#
-# unless node['opencart']['customers_groups'].nil?
-#   node['opencart']['customers_groups'].each do |customer_group|
-#     php_oc_customer_group customer_group['slug'] do
-#       approval customer_group['approval']
-#       sort_order customer_group['sort_order']
-#       discount customer_group['discount']
-#       discount_minimum customer_group['discount_minimum']
-#       description customer_group['description']
-#
-#       unless customer_group['customer_group_id'].nil?
-#         customer_group_id customer_group['customer_group_id']
-#       end
-#     end
-#   end
-# end
-#
-# unless node['opencart']['length_classes'].nil?
-#   node['opencart']['length_classes'].each do |length|
-#     php_oc_length length['slug'] do
-#       value length['value']
-#       description length['description']
-#
-#       unless length['length_class_id'].nil?
-#         length_class_id length['length_class_id']
-#       end
-#     end
-#   end
-# end
-#
-#
-# unless node['opencart']['banners'].nil?
-#   node['opencart']['banners'].each do |banner|
-#     php_oc_banner banner['name'] do
-#       status banner['status'] || 1
-#       force banner['force'] || false
-#       images banner['banner_image']
-#     end
-#   end
-# end
-#
-
-#
-# unless node['opencart']['currencies'].nil?
-#   node['opencart']['currencies'].each do |currency|
-#     php_oc_currency currency['code'] do
-#       title currency['title']
-#       symbol_left currency['symbol_left']
-#       symbol_right currency['symbol_right']
-#       decimal_place currency['decimal_place']
-#       value currency['value']
-#       status currency['status']
-#     end
-#   end
-# end
-#
-# unless node['opencart']['enabled_currencies'].nil?
-#   currencies = node['opencart']['enabled_currencies'].join(' ')
-#   execute "php cli/index.php currency/enable #{currencies}" do
-#     cwd node['deploy-project']['path']
-#     action :run
-#   end
-# end
-#
 execute "rm -rf #{node['deploy-project']['path']}/system/cache/*" do
   action :run
 end
@@ -286,7 +289,7 @@ end
 if node['deploy-project']['dev']
   execute "php cli/index.php users/password 'admin' '123123'" do
     cwd node['deploy-project']['path']
-    only_if { ::File::exists("#{node['deploy-project']['path']}/cli/index.php")}
+    only_if { ::File::exists?("#{node['deploy-project']['path']}/cli/index.php")}
     action :run
   end
 end
